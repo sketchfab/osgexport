@@ -916,6 +916,66 @@ class BlenderObjectToGeometry(object):
         self.unique_objects.registerTexture(mtex.texture, texture)
         return texture
 
+    def decodeShaderNode(self, mat_source, m):
+        # predefined shadernodes
+        def findNode(nodes, name):
+            for node in nodes:
+                if node.type == name:
+                    return node
+            return None
+
+        def findInputNode(node, socket, type):
+            for node_input in node.inputs.values():
+                if node_input.name == socket:
+                    for link in node_input.links:
+                        if link.from_node.type == type:
+                            return link.from_node
+
+        if mat_source.node_tree is not None:
+            # kerbal space program shadernode configuration :
+            # geometry => texture => material => output
+            node_output = findNode(mat_source.node_tree.nodes, "OUTPUT")
+            if node_output:
+                node_material = findInputNode(node_output, "Color", "MATERIAL")
+                if node_material:
+                    node_texture = findInputNode(node_material, "Color", "TEXTURE")
+                    if node_texture:
+                        print("shaderNode : ksp")
+                        node_geometry = findInputNode(node_texture, "UV", "GEOMETRY")
+
+                        m.getOrCreateUserData().append(StringValueObject("source", "blender"))
+                        m.getOrCreateUserData().append(StringValueObject("shaderNode", "true"))
+
+                        return node_material.material
+
+            # cycles baking configuration :
+            # diffuse_bsdf => material_output
+            # tex_image
+            node_output = findNode(mat_source.node_tree.nodes, "OUTPUT_MATERIAL")
+            node_tex = findNode(mat_source.node_tree.nodes, "TEX_IMAGE")
+            if node_output and node_tex:
+                node_diffuse = findInputNode(node_output, "Surface", "BSDF_DIFFUSE")
+                if node_diffuse:
+                    print("shaderNode : bake")
+
+                    m.getOrCreateUserData().append(StringValueObject("source", "blender"))
+                    m.getOrCreateUserData().append(StringValueObject("shaderNode", "true"))
+
+                    mat = bpy.data.materials.new("{}_sn".format(mat_source.name))
+
+                    tex = bpy.data.textures.new('ColorTex', type = 'IMAGE')
+                    tex.image = node_tex.image
+
+                    mtex = mat.texture_slots.add()
+                    mtex.texture = tex
+                    mtex.texture_coords = 'UV'
+                    mtex.use_map_color_diffuse = True
+                    mtex.mapping = node_tex.texture_mapping.mapping
+
+                    return mat
+
+        return mat_source
+
     def adjustUVLayerFromMaterial(self, geom, material, mesh_uv_textures):
 
         uvs = geom.uvs
@@ -986,6 +1046,11 @@ class BlenderObjectToGeometry(object):
         m.dataVariance = "DYNAMIC"
         m.setName(mat_source.name)
         s.setName(mat_source.name)
+
+
+        mat_source = self.decodeShaderNode(mat_source, m)
+
+
 
         #bpy.ops.object.select_name(name=self.object.name)
         anim = createAnimationMaterialAndSetCallback(m, mat_source, self.config, self.unique_objects)
