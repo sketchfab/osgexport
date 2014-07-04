@@ -1390,6 +1390,8 @@ class BlenderObjectToGeometry(object):
             tagged_vertexes.append(False)
 
         def truncateFloat(value, digit = 5):
+            if math.isnan(value):
+                return 0
             return round(value, digit)
 
         def truncateVector(vector, digit = 5):
