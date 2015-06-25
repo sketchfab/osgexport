@@ -46,7 +46,7 @@ class Config(object):
         self.defaultattr("filename", "")
 
         self.defaultattr("indent", int(2))
-        self.defaultattr("float_precision", int(5))
+        self.defaultattr("float_precision", None)
         self.defaultattr("format_num", int(0))
         self.defaultattr("anim_fps", 25.0)
         self.defaultattr("log", True)

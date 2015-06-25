@@ -728,6 +728,8 @@ class Export(object):
             return
 
         filename = self.config.getFullName("osgt")
+        # Set the float precision
+        osgobject.FLOATPRE = self.config.float_precision
         osglog.log("write file to {}".format(filename))
         with open(filename, "wb") as sfile:
             # sfile.write(str(self.root).encode('utf-8'))

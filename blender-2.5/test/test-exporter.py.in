@@ -81,7 +81,7 @@ class Exporter(unittest.TestCase):
         self.assertEquals("", conf.filename)
         self.assertEquals("", conf.author)
         self.assertEquals(2, conf.indent)
-        self.assertEquals(5, conf.float_precision)
+        self.assertEquals(None, conf.float_precision)
         self.assertEquals(0, conf.format_num)
         self.assertEquals(25, conf.anim_fps)
         self.assertEquals(None, conf.log_file)
@@ -94,6 +94,10 @@ class Exporter(unittest.TestCase):
 
 
     def testLightSource(self):
+        # Float precision is not 5 anymore (optionnal)
+        # Set float precision to 5 to pass the tests
+        osg.osgobject.FLOATPRE = 5
+        osg.osgobject.STRFLT = lambda f: "{1:.{0}f}".format(osg.osgobject.FLOATPRE, float(f))
         node = LightSource()
         node.setName("dummy")
         node.light = Light()

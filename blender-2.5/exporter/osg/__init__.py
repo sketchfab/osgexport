@@ -90,6 +90,7 @@ def main():
                         help="Store materials into JSON format")
     parser.add_argument("-s", "--json-shaders", dest="json_shaders", action="store_true", default=False,
                         help="Store shader graphs into JSON format")
+    parser.add_argument("-p", "--float-precision", dest="float_precision", default=None, help="Set float precision for serialization")
 
     args = parser.parse_args(argv)  # In this example we wont use the args
 
@@ -103,6 +104,7 @@ def main():
         config.scene = bpy.context.scene
         config.json_materials = args.json_materials
         config.json_shaders = args.json_shaders
+        config.float_precision = args.float_precision
         OpenSceneGraphExport(config)
 
 if __name__ == "__main__":

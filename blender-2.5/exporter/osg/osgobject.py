@@ -26,9 +26,9 @@ import mathutils
 
 Matrix = mathutils.Matrix
 Vector = mathutils.Vector
-FLOATPRE = 5
+FLOATPRE = None
 CONCAT = lambda s, j="": j.join(str(v) for v in s)
-STRFLT = lambda f: "{1:.{0}f}f".format(FLOATPRE, float(f))
+STRFLT = lambda f: "{1:.{0}}".format(FLOATPRE, float(f)) if FLOATPRE is not None else "{}".format(float(f))
 INDENT = 2
 VERSION = (0, 0, 0)
 
